@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File mẫu SQL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Nội dung file mẫu SQL</h1>
+    <pre>
+-- Người thực hiện: Nguyễn Văn A    Mã SV: 11111111
+-- Em cam đoan tất cả các câu dưới đây đều do em viết code và chạy ra kết quả
+-- Ngoại trừ các câu: p, q (bài 1.2 QLNV) tham khảo từ bạn Trần Văn X 
+-- và câu z (bài 1.2 Thống kê) tham khảo từ bạn Lê Thị Y
+
+-- Bài 1 QLNV
+
+-- Câu a. Tìm ngày sinh và địa chỉ của nhân viên “Nguyễn Bảo Hùng”
+Select NgSinh, DcHi
+From NhanVien
+Where HoNV = 'Nguyen' and Tenlot = 'Bao' and TenNV = 'Hung';
+
+-- Câu b. Tìm tên và địa chỉ của các nhân viên làm việc cho phòng “Nghiên cứu”
+Select HoNV, TenLot, TenNV, DcHi
+From NhanVien, PhongBan
+Where NhanVien.Phong = PhongBan.MaPB and TenPB = 'Nghien cuu';
+    </pre>
+</body>
+</html>
