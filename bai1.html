@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File mẫu SQL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bai 1:QUẢN LÝ NHÂN VIÊN</h1>
+    <pre>
+-- Người thực hiện: Võ Thị Mai Quỳnh    Mã SV: 23110147
+
+--1.Hãy cho biết tên các dự án mà nhân viên có mã ‘NV01’ tham gia
+
+SELECT DUAN.TenDA
+FROM DUAN inner join PhanCong ON DUAN.MaDA=PhanCong.MaDA
+WHERE PhanCong.MaNV='nv01'
+
+--2.Tính tổng thời gian tham gia các dự án của mỗi nhân viên
+SELECT HoNV,Tenlot,tenNV,SUM(ThoiGian) tongthoigian
+FROM NhanVien join PhanCong ON NhanVien.Manv=PhanCong.MaNV
+GROUP BY HoNV,Tenlot,tenNV
+
+--3a.Tìm ngày sinh và địa chỉ của nhân viên “Nguyễn Bảo Hùng”
+SELECT NgSinh,Dchi
+FROM NhanVien
+WHERE HoNV='Nguyen'AND Tenlot='Bao' AND tenNV='Hung'
+
+--3b.Tìm tên và địa chỉ của các nhân viên làm việc 
+--cho phòng “Nghiên cứu”
+SELECT HoNV,Tenlot,tenNV,Dchi
+FROM NhanVien inner join PhongBan ON NhanVien.Phong=PhongBan.MaPB
+WHERE TenPB='Nghien cuu'
+
+--3c.Với mỗi dự án được triển khai ở Gò Vấp, cho biết mã dự án, mã phòng 
+--quản lý và họ tên, ngày sinh trưởng phòng của phòng đó 
+SELECT MaDA,DUAN.Phong, HoNV,Tenlot, tenNV,NgSinh
+FROM DUAN inner join PhongBan ON DUAN.Phong=PhongBan.MaPB
+inner join NhanVien ON NhanVien.Manv=PhongBan.TrPhong
+WHERE DiaDiem='Go Vap'
+
+--3d.Với mỗi nhân viên, cho biết họ tên nhân viên và
+-- họ tên của người quản lý nhân viên đó 
+SELECT NhanVien.HoNV, NhanVien.Tenlot,NhanVien.tenNV,NV2.HoNV as HoNQL,NV2.Tenlot,NV2.tenNV as tenNQL
+FROM NhanVien inner join NhanVien NV2 ON NhanVien.MaNQL=NV2.Manv
+
+--3e.Cho biết mã nhân viên, họ và tên của các nhân viên của 
+--phòng “Nghiên cứu” có mức lương từ 30000 đến 50000
+SELECT Manv,HoNV,Tenlot,tenNV
+FROM NhanVien inner join PhongBan ON NhanVien.Phong=PhongBan.MaPB
+WHERE Luong>=30000 and Luong<=50000
+
+--3f.Cho biết mã nhân viên, họ tên nhân viên và 
+--mã dự án, tên dự án của các dự án mà họ tham gia 
+SELECT B.MaNV,HoNV,Tenlot,TenNV,B.MaDA,TenDA
+FROM  NhanVien inner join (SELECT TenDA,DUAN.MaDA,MaNV
+                             FROM DUAN inner join PhanCong ON PhanCong.MaDA = DUAN.MaDA) 
+                             AS B ON NhanVien.Manv=B.MaNV
+
+--3g.Cho biết mã nhân viên, họ tên của những 
+--người không có người quản lý 
+SELECT HoNV,Tenlot,TenNV
+FROM NhanVien
+WHERE MaNQL IS NULL
+
+--3h.Cho biết họ tên của các trưởng phòng có thân nhân 
+SELECT distinct HoNV, Tenlot, tenNV
+FROM NhanVien, (SELECT TrPhong
+                FROM PhongBan, ThanNhan
+                WHERE PhongBan.TrPhong = ThanNhan.MaNV) Q
+WHERE NhanVien.MaNV = Q.TrPhong
+
+--3i.Tính tổng lương nhân viên, lương cao nhất, 
+--lương thấp nhất và mức lương trung bình 
+SELECT SUM(Luong) as Tong, MAX(Luong) as LonNhat,MIN(Luong) as NhoNhat, AVG(Luong) AS TrungBinh
+FROM NhanVien
+
+--3k.Với mỗi phòng, cho biết mã phòng, số 
+--lượng nhân viên và mức lương trung bình 
+SELECT MaPB,COUNT(Manv) as SoNV, AVG(Luong) as LuongTB
+FROM PhongBan inner join NhanVien ON MaPB=Phong
+GROUP BY MaPB
+
+--3l.Với mỗi dự án, cho biết mã dự án, 
+--tên dự án và tổng số nhân viên tham gia 
+SELECT DUAN.MaDA,TenDA,Count(MaNV) as SoNV
+FROM DUAN inner join PhanCong ON DUAN.MaDA=PhanCong.MaDA
+GROUP BY TenDA,DUAN.MaDA
+
+--3m.Với mỗi dự án có nhiều hơn 2 nhân 
+--viên tham gia, cho biết mã dự án, tên dự án và số lượng nhân viên tham gia 
+SELECT DUAN.MaDA,TenDA,Count(MaNV) as SoNV
+FROM DUAN inner join PhanCong ON DUAN.MaDA=PhanCong.MaDA
+GROUP BY TenDA,DUAN.MaDA
+HAVING Count(MaNV)>2
+
+--3n.Với mỗi dự án, cho biết mã số dự án, tên 
+--dự án và số lượng nhân viên phòng số 5 tham gia
+SELECT DUAN.MaDA,TenDA,Count(MaNV) as SoNVPhong5
+FROM DUAN inner join PhanCong ON DUAN.MaDA=PhanCong.MaDA
+WHERE MaNV='nv05'
+GROUP BY TenDA,DUAN.MaDA
+
+--3o.Với mỗi phòng có nhiều hơn 2 nhân viên,
+--cho biết mã phòng và số lượng nhân viên có lương lớn hơn 25000
+SELECT MaPB,Count(MaNV) as SoNVLuongHon25000
+FROM NhanVien inner join (SELECT MaPB
+                          From PhongBan inner join NhanVien ON MaPB=phong
+			  Group by MaPB having count(Manv)>2)
+			  as A ON MaPB=Phong
+WHERE Luong>25000
+GROUP BY MaPB
+
+--3p.Với mỗi phòng có mức lương trung bình lớn hơn 30000, cho biết
+--mã phòng, tên phòng, số lượng nhân viên của phòng đó 
+SELECT MaPB,TenPB, Count(MaNV)
+From PhongBan inner join NhanVien ON MaPB=phong
+Group by MaPB, TenPB having avg(Luong)>30000
+
+--3q.Với mỗi phòng có mức lương trung bình lớn hơn 30000,
+--cho biết mã phòng, tên phòng, số lượng nhân viên nam của phòng đó 
+SELECT MaPB,TenPB, Count(MaNV) as SoNhanVienNam
+FROM NhanVien inner join(SELECT MaPB,TenPB
+                         From PhongBan inner join NhanVien ON MaPB=Phong
+                         Group by MaPB, TenPB having avg(Luong)>30000) 
+						 AS A ON A.MaPB=NhanVien.Phong
+WHERE Phai='Nam'
+Group by MaPB, TenPB 
+    </pre>
+</body>
+</html>
