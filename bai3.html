@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File mẫu SQL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bài 3: QUẢN LÝ CƠ QUAN</h1>
+    <pre>
+-- Người thực hiện: Võ Thị Mai Quỳnh    Mã SV: 23110147
+
+CREATE DATABASE QLCOQUAN;
+GO
+USE QLCOQUAN
+GO
+-- Tạo bảng COQUAN (Cơ quan)
+CREATE TABLE COQUAN (
+    MSCOQUAN VARCHAR(10) PRIMARY KEY,
+    TENCOQUAN VARCHAR(100),
+    DIACHI VARCHAR(255)
+);
+GO
+
+-- Tạo bảng NV (Nhân viên)
+CREATE TABLE NV (
+    MSNV VARCHAR(10) PRIMARY KEY,
+    TEN NVARCHAR(100),
+    MSCOQUAN VARCHAR(10),
+    CONGVIEC VARCHAR(100),
+    LUONG DECIMAL(10, 2),
+    FOREIGN KEY (MSCOQUAN) REFERENCES COQUAN(MSCOQUAN)
+);
+GO
+
+-- Thêm dữ liệu vào bảng COQUAN
+INSERT INTO COQUAN (MSCOQUAN, TENCOQUAN, DIACHI) VALUES
+('50', 'Cơ Quan A', 'Hà Nội'),
+('15', 'Cơ Quan B', 'Hồ Chí Minh'),
+('20', 'Cơ Quan C', 'Đà Nẵng'),
+('25', 'Cơ Quan D', 'Hải Phòng'),
+('30', 'Cơ Quan E', 'Đồ Sơn');
+GO
+
+-- Thêm dữ liệu vào bảng NV
+INSERT INTO NV (MSNV, TEN, MSCOQUAN, CONGVIEC, LUONG) VALUES
+('NV01', N'Nguyễn Văn A', '50', 'Kỹ sư', 15000),
+('NV02', N'Trần Thị B', '15', 'Quản lý', 20000),
+('NV03', N'Lê Văn C', '20', 'Nhân viên', 12000),
+('NV04', N'Phạm Thị D', '25', 'Kế toán', 18000),
+('NV05', N'Hoàng Văn E', '30', 'Giám đốc', 25000),
+('NV06', N'Vũ Thị F', '30', 'Nhân viên', 13000);
+GO
+--a.Tìm tên những nhân viên ở cơ quan có mã số là 50
+SELECT TEN
+FROM NV
+WHERE MSCOQUAN = '50'
+--b. Tìm mã số tất cả các cơ quan từ quan hệ NV
+SELECT distinct MSCOQUAN
+FROM NV
+--c. Tìm tên các nhân viên ở cơ quan có mã số là 15,20,25
+SELECT TEN
+FROM NV
+WHERE MSCOQUAN = '15' or MSCOQUAN = '20' or MSCOQUAN = '25'
+--d. Tìm tên những người làm việc ở Đồ Sơn
+SELECT TEN
+FROM NV, COQUAN
+WHERE NV.MSCOQUAN = COQUAN.MSCOQUAN and DIACHI = 'Đồ Sơn'
+    </pre>
+</body>
+</html>

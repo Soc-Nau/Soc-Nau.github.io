@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File mẫu SQL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bài 5: QUẢN LÝ KỲ THI</h1>
+    <pre>
+-- Người thực hiện: Võ Thị Mai Quỳnh   Mã SV: 23110147
+
+-- Tạo cơ sở dữ liệu
+CREATE DATABASE QLKYTHI;
+
+GO
+
+USE QLKYTHI;
+
+-- Bảng MHOC (Môn học)
+CREATE TABLE MHOC (
+    MAMH VARCHAR(10) PRIMARY KEY,
+    TENMH NVARCHAR(100),
+    SOTIET INT
+);
+
+GO
+
+-- Bảng GV (Giáo viên)
+CREATE TABLE GV (
+    MAGV VARCHAR(10) PRIMARY KEY,
+    TENGV NVARCHAR(100),
+    MAMH VARCHAR(10), -- MAMH có thể là null nếu không phải là chủ nhiệm
+    FOREIGN KEY (MAMH) REFERENCES MHOC(MAMH)  -- Mối quan hệ với bảng MHOC
+);
+
+GO
+
+-- Bảng BUOITHI (Buổi thi)
+CREATE TABLE BUOITHI (
+    HKY VARCHAR(10),
+    NGAY DATE,
+    GIO TIME,
+    PHG VARCHAR(10),
+    MAMH VARCHAR(10),
+    TGTHI INT,
+    PRIMARY KEY (HKY, NGAY, GIO, PHG),
+    FOREIGN KEY (MAMH) REFERENCES MHOC(MAMH)  -- Mối quan hệ với bảng MHOC
+);
+
+GO
+
+-- Bảng PC_COI_THI (Phân công coi thi)
+CREATE TABLE PC_COI_THI (
+    MAGV VARCHAR(10),
+    HKY VARCHAR(10),
+    NGAY DATE,
+    GIO TIME,
+    PHG VARCHAR(10),
+    PRIMARY KEY (MAGV, HKY, NGAY, GIO, PHG),
+    FOREIGN KEY (MAGV) REFERENCES GV(MAGV)  -- Mối quan hệ với bảng GV
+);
+
+GO
+
+-- Thêm dữ liệu vào bảng MHOC
+INSERT INTO MHOC (MAMH, TENMH, SOTIET) VALUES
+('MH01', 'VĂN HỌC', 45),
+('MH02', 'TOÁN', 30),
+('MH03', 'VẬT LÝ', 50),
+('MH04', 'HÓA HỌC', 60);
+
+-- Thêm dữ liệu vào bảng GV
+INSERT INTO GV (MAGV, TENGV, MAMH) VALUES
+('GV01', N'Nguyễn Văn A', 'MH01'),
+('GV02', N'Trần Thị B', NULL), -- Không phải chủ nhiệm
+('GV03', N'Lê Văn C', 'MH02'),
+('GV04', N'Phạm Thị D', 'MH03'),
+('GV05', N'Nguyễn Văn E', 'MH04');
+DELETE FROM GV;
+-- Thêm dữ liệu vào bảng BUOITHI
+INSERT INTO BUOITHI (HKY, NGAY, GIO, PHG, MAMH, TGTHI) VALUES
+('HK1', '2024-12-01', '08:00', 'PHG1', 'MH01', 150),
+('HK1', '2024-12-02', '10:00', 'PHG2', 'MH02', 120),
+('HK1', '2024-12-01', '10:00', 'PHG3', 'MH03', 150),
+('HK1', '2024-12-03', '08:00', 'PHG1', 'MH01', 150);
+-- Thêm dữ liệu vào bảng PC_COI_THI
+INSERT INTO PC_COI_THI (MAGV, HKY, NGAY, GIO, PHG) VALUES
+('GV01', 'HK1', '2024-12-01', '08:00', 'PHG1'),
+('GV03', 'HK1', '2024-12-01', '10:00', 'PHG3'),
+('GV04', 'HK1', '2024-12-02', '10:00', 'PHG2');
+
+--a. Danh sách các giáo viên dạy các môn học có số tiết từ 45 trở lên
+SELECT DISTINCT GV.TENGV
+FROM GV JOIN MHOC ON GV.MAMH = MHOC.MAMH
+WHERE MHOC.SOTIET >= 45;
+
+--b. Danh sách giáo viên được phân công gác thi trong học kỳ 1
+SELECT DISTINCT GV.TENGV
+FROM GV JOIN PC_COI_THI ON GV.MAGV = PC_COI_THI.MAGV
+WHERE PC_COI_THI.HKY = 'HK1';
+
+--c. Danh sách giáo viên không được phân công gác thi trong học kỳ 1
+SELECT TENGV
+FROM GV
+WHERE MAGV NOT IN (
+    SELECT MAGV
+    FROM PC_COI_THI
+    WHERE HKY = 'HK1'
+);
+
+--d. Cho biết lịch thi môn văn (TENMH = ‘VĂN HỌC’)
+SELECT *
+FROM BUOITHI
+WHERE MAMH = 'MH01';  
+
+--e. Cho biết các buổi gác thi của các giáo viên chủ nhiệm môn văn (TENMH = ‘VĂN HỌC’).
+SELECT PC_COI_THI.*
+FROM PC_COI_THI JOIN GV ON PC_COI_THI.MAGV = GV.MAGV
+WHERE GV.MAMH = 'MH01';  
+
+
+    </pre>
+</body>
+</html>

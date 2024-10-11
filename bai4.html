@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File mẫu SQL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bài 4:QUẢN LÝ GARA</h1>
+    <pre>
+-- Người thực hiện: Võ Thị Mai Quỳnh    Mã SV: 23110147
+
+-- Tạo CSDL
+CREATE DATABASE GarageManagement;
+
+GO
+
+USE GarageManagement;
+
+-- Bảng THO (Người thợ)
+CREATE TABLE THO (
+    MaTho VARCHAR(10) PRIMARY KEY,
+    TenTho NVARCHAR(100),
+    Nhom NVARCHAR(50),
+    NhomTruong VARCHAR(10),
+    FOREIGN KEY (NhomTruong) REFERENCES THO(MaTho)  -- Nhóm trưởng phải là một trong những người thợ
+);
+
+GO
+
+-- Bảng CONGVIEC (Công việc)
+CREATE TABLE CONGVIEC (
+    MaCV VARCHAR(10) PRIMARY KEY,
+    NoiDungCV NVARCHAR(255)
+);
+
+GO
+
+-- Bảng KHACHHANG (Khách hàng)
+CREATE TABLE KHACHHANG (
+    MaKH VARCHAR(10) PRIMARY KEY,
+    TenKH NVARCHAR(100),
+    DiaChi NVARCHAR(255),
+    DienThoai VARCHAR(15)
+);
+
+GO
+
+-- Bảng HOPDONG (Hợp đồng)
+CREATE TABLE HOPDONG (
+    SoHD VARCHAR(10) PRIMARY KEY,
+    NgayHD DATE,
+    MaKH VARCHAR(10),
+    SoXe VARCHAR(20),
+    TriGiaHD DECIMAL(10, 2),
+    NgayGiaoDK DATE,
+    NgayNgThu DATE,
+    FOREIGN KEY (MaKH) REFERENCES KHACHHANG(MaKH)
+);
+
+GO
+
+-- Bảng CHITIET_HD (Chi tiết hợp đồng)
+CREATE TABLE CHITIET_HD (
+    SoHD VARCHAR(10),
+    MaCV VARCHAR(10),
+    TriGiaCV DECIMAL(10, 2),
+    MaTho VARCHAR(10),
+    KhoanTHo DECIMAL(10, 2),
+    PRIMARY KEY (SoHD, MaCV),
+    FOREIGN KEY (SoHD) REFERENCES HOPDONG(SoHD),
+    FOREIGN KEY (MaCV) REFERENCES CONGVIEC(MaCV),
+    FOREIGN KEY (MaTho) REFERENCES THO(MaTho)
+);
+
+GO
+
+-- Bảng PHIEUTHU (Phiếu thu)
+CREATE TABLE PHIEUTHU (
+    SoPT VARCHAR(10) PRIMARY KEY,
+    NgayLapPT DATE,
+    SoHD VARCHAR(10),
+    MaKH VARCHAR(10),
+    HoTen NVARCHAR(100),
+    SoTienThu DECIMAL(10, 2),
+    FOREIGN KEY (SoHD) REFERENCES HOPDONG(SoHD),
+    FOREIGN KEY (MaKH) REFERENCES KHACHHANG(MaKH)
+);
+GO
+INSERT INTO THO (MaTho, TenTho, Nhom, NhomTruong) VALUES
+('T01', N'Nguyễn Văn A', N'Nhom 1', 'T02'),
+('T02', N'Trần Thị B', N'Nhom 1', NULL),
+('T03', N'Phạm Văn C', N'Nhom 2', 'T04'),
+('T04', N'Nguyễn Thị D', N'Nhom 2', NULL),
+('T05', N'Nguyễn Văn E', N'Nhom 1', 'T01');
+GO
+INSERT INTO CONGVIEC (MaCV, NoiDungCV) VALUES
+('CV01', N'Sửa chữa động cơ'),
+('CV02', N'Thay dầu'),
+('CV03', N'Sửa chữa hệ thống điện'),
+('CV04', N'Tây cờ bản lề'),
+('CV05', N'Sửa chữa gầm');
+
+GO
+INSERT INTO KHACHHANG (MaKH, TenKH, DiaChi, DienThoai) VALUES
+('KH01', N'Nguyễn Văn X', N'Số 1, Đường A, Quận 1', '0901234567'),
+('KH02', N'Trần Thị Y', N'Số 2, Đường B, Quận 2', '0902345678'),
+('KH03', N'Phạm Văn Z', N'Số 3, Đường C, Quận 3', '0903456789'),
+('KH04', N'Nguyễn Thị T', N'Số 4, Đường D, Quận 4', '0904567890');
+
+GO 
+INSERT INTO HOPDONG (SoHD, NgayHD, MaKH, SoXe, TriGiaHD, NgayGiaoDK, NgayNgThu) VALUES
+('HD01', '2023-01-01', 'KH01', '79A-12345', 1500000.00, '2023-01-10', NULL),
+('HD02', '2023-02-01', 'KH02', '79B-67890', 2500000.00, '2023-02-15', '2023-02-10'),
+('HD03', '2023-03-01', 'KH03', '79C-54321', 3000000.00, '2023-03-20', '2023-03-18'),
+('HD04', '2023-04-01', 'KH04', '79D-98765', 2000000.00, '2023-04-25', NULL);
+
+GO
+INSERT INTO CHITIET_HD (SoHD, MaCV, TriGiaCV, MaTho, KhoanTHo) VALUES
+('HD01', 'CV01', 500000.00, 'T02', 400000.00),
+('HD01', 'CV02', 300000.00, 'T02', 250000.00),
+('HD02', 'CV03', 700000.00, 'T03', 600000.00),
+('HD03', 'CV04', 400000.00, 'T04', 350000.00),
+('HD04', 'CV05', 800000.00, 'T05', 700000.00);
+
+GO
+INSERT INTO PHIEUTHU (SoPT, NgayLapPT, SoHD, MaKH, HoTen, SoTienThu) VALUES
+('PT01', '2023-01-05', 'HD01', 'KH01', N'Nguyễn Văn X', 1500000.00),
+('PT02', '2023-02-05', 'HD02', 'KH02', N'Trần Thị Y', 1000000.00),
+('PT03', '2023-03-15', 'HD03', 'KH03', N'Phạm Văn Z', 1500000.00),
+('PT04', '2023-04-30', 'HD04', 'KH04', N'Nguyễn Thị T', 2000000.00);
+GO
+
+--1. Cho biết danh sách các người thợ hiện không tham gia vào một hợp đồng sửa chữa nào.
+SELECT * 
+FROM THO 
+WHERE MaTho NOT IN (SELECT DISTINCT MaTho FROM CHITIET_HD);
+
+--2. Cho biết danh sách những hợp đồng đã thanh lý nhưng chưa được thanh toán tiền đầy đủ.
+SELECT H.*
+FROM HOPDONG H
+LEFT JOIN PHIEUTHU P ON H.SoHD = P.SoHD
+WHERE H.NgayNgThu IS NOT NULL AND 
+      (SELECT SUM(SoTienThu) FROM PHIEUTHU WHERE SoHD = H.SoHD) < H.TriGiaHD;
+
+--3. Cho biết danh sách những hợp đồng cần phải hoàn tất trước ngày 31/12/2002.
+SELECT *
+FROM HOPDONG
+WHERE NgayGiaoDK < '2023-3-15';
+
+--4. Cho biết người thợ nào thực hiện công việc nhiều nhất.
+SELECT TenTho
+FROM THO 
+WHERE MaTho = (
+    SELECT TOP 1 MaTho
+    FROM CHITIET_HD
+    GROUP BY MaTho
+    ORDER BY COUNT(MaCV) DESC
+);
+
+--5. Cho biết người thợ nào có tổng trị giá công việc được giao cao nhất.
+SELECT TenTho
+FROM THO
+WHERE MaTho = (
+    SELECT TOP 1 MaTho
+    FROM CHITIET_HD
+    GROUP BY MaTho
+    ORDER BY SUM(TriGiaCV) DESC
+);
+
+
+    </pre>
+</body>
+</html>

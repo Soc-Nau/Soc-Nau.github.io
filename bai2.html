@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File mẫu SQL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bài 2: QUẢN LÝ THƯ VIỆN</h1>
+    <pre>
+-- Người thực hiện: Võ Thị Mai Quỳnh    Mã SV: 23110147
+-- Em cam đoan tất cả các câu dưới đây đều do em viết code và chạy ra kết quả
+
+
+-- Tạo CSDL
+CREATE DATABASE QLTHUVIEN;
+GO
+
+-- Sử dụng CSDL QLTHUVIEN
+USE QLTHUVIEN;
+GO
+
+-- Bảng Nhà Xuất Bản (NXB)
+CREATE TABLE NXB (
+    MaNXB VARCHAR(10) PRIMARY KEY,
+    TenNXB VARCHAR(100),
+    DiaChi VARCHAR(255),
+    SoDT VARCHAR(15)
+);
+GO
+
+-- Bảng Đầu Sách (DauSach)
+CREATE TABLE DauSach (
+    MaSach VARCHAR(10) PRIMARY KEY,
+    Tua VARCHAR(255),
+    MaNXB VARCHAR(10),
+    FOREIGN KEY (MaNXB) REFERENCES NXB(MaNXB)
+);
+GO
+
+-- Bảng Tác Giả (TacGia)
+CREATE TABLE TacGia (
+    MaSach VARCHAR(10),
+    TenTacGia VARCHAR(100),
+    PRIMARY KEY (MaSach, TenTacGia),
+    FOREIGN KEY (MaSach) REFERENCES DauSach(MaSach)
+);
+GO
+
+-- Bảng Cuốn Sách (CuonSach)
+CREATE TABLE CuonSach (
+    MaSach VARCHAR(10),
+    MaCuon VARCHAR(10) PRIMARY KEY,
+    ViTri VARCHAR(50),
+    FOREIGN KEY (MaSach) REFERENCES DauSach(MaSach)
+);
+GO
+
+-- Bảng Độc Giả (DocGia)
+CREATE TABLE DocGia (
+    MaDG VARCHAR(10) PRIMARY KEY,
+    TenDG VARCHAR(100),
+    DiaChi VARCHAR(255),
+    SoDT VARCHAR(15)
+);
+GO
+
+-- Bảng Mượn (Muon)
+CREATE TABLE Muon (
+    MaCuon VARCHAR(10),
+    MaDG VARCHAR(10),
+    NgayMuon DATE,
+    NgayTra DATE,
+    PRIMARY KEY (MaCuon, MaDG),
+    FOREIGN KEY (MaCuon) REFERENCES CuonSach(MaCuon),
+    FOREIGN KEY (MaDG) REFERENCES DocGia(MaDG)
+);
+GO
+
+-- Thêm dữ liệu vào bảng NXB
+INSERT INTO NXB (MaNXB, TenNXB, DiaChi, SoDT) VALUES 
+('NXB01', 'Addison Wesley', '123 ABC Street', '0123456789'),
+('NXB02', 'Pearson', '456 DEF Street', '0987654321'),
+('NXB03', 'Hemingway Press', '789 GHI Street', '0912345678'),
+('NXB04', 'New Publisher', '123 XYZ Street', '0112233445');
+GO
+
+-- Thêm dữ liệu vào bảng DauSach
+INSERT INTO DauSach (MaSach, Tua, MaNXB) VALUES 
+('S01', 'Python for Data Analysis', 'NXB01'),
+('S02', 'Machine Learning', 'NXB02'),
+('S03', 'Advanced Algorithms', 'NXB03'),
+('S04', 'Deep Learning', 'NXB01'),
+('S05', 'Data Science Handbook', 'NXB04');
+GO
+
+-- Thêm dữ liệu vào bảng TacGia
+INSERT INTO TacGia (MaSach, TenTacGia) VALUES 
+('S01', 'Hemingway'),
+('S02', 'Tom Mitchell'),
+('S03', 'Donald Knuth'),
+('S04', 'Ian Goodfellow'),
+('S04', 'Yoshua Bengio'),
+('S05', 'Jake VanderPlas');
+
+GO
+
+-- Thêm dữ liệu vào bảng CuonSach
+INSERT INTO CuonSach (MaSach, MaCuon, ViTri) VALUES 
+('S01', 'C001', 'A1'),
+('S01', 'C002', 'A2'),
+('S02', 'C003', 'B1'),
+('S03', 'C004', 'C1'),
+('S04', 'C005', 'D1'),
+('S05', 'C006', 'E1');
+GO
+
+-- Thêm dữ liệu vào bảng DocGia
+INSERT INTO DocGia (MaDG, TenDG, DiaChi, SoDT) VALUES 
+('DG01', 'Nguyen Van A', '123 DEF Street', '0966778899'),
+('DG02', 'Pham Thi B', '345 GHI Street', '0977889900'),
+('DG03', 'Tran Van C', '567 JKL Street', '0988990011');
+GO
+
+-- Thêm dữ liệu vào bảng Muon
+INSERT INTO Muon (MaCuon, MaDG, NgayMuon, NgayTra) VALUES 
+('C001', 'DG01', '2023-09-01', '2023-09-10'),
+('C002', 'DG02', '2023-09-05', '2023-09-12'),
+('C003', 'DG01', '2023-09-07', '2023-09-17'),
+('C004', 'DG03', '2023-09-09', '2023-09-19'),
+('C005', 'DG02', '2023-09-11', '2023-09-21');
+GO
+--a.Cho biết Địa chỉ và số điện thoại của Nhà xuất bản “Addison Wesley”
+SELECT TenNXB, DiaChi, SoDT
+FROM NXB
+WHERE TenNXB = 'Addison Wesley'
+
+--b.Cho biết mã sách và Tựa sách của những cuốn sách được xuất bản 
+--bởi nhà xuất bản “Addison Wesley”
+SELECT MaSach, Tua
+FROM DauSach, NXB
+WHERE DauSach.MaNXB = NXB.MaNXB and TenNXB = 'Addison Wesley'
+
+--c. Cho biết mã sách và Tựa sách của những cuốn sách có tác giả là “Hemingway”
+SELECT DauSach.MaSach, Tua
+FROM DauSach, TacGia
+WHERE DauSach.MaSach = TacGia.MaSach and TenTacGia = 'Hemingway'
+
+--d. Với mỗi đầu sách, cho biết tựa và số lượng cuốn sách mà thư viện đang sở hữu
+SELECT Tua, COUNT(MaCuon) as SLCuon
+FROM DauSach, CuonSach
+WHERE DauSach.MaSach = CuonSach.MaSach
+GROUP BY Tua
+
+--e. Với mỗi độc giả, hãy cho biết Tên, địa chỉ và số lượng cuốn sách mà 
+--người đó đã mượn
+SELECT TenDG, DiaChi, COUNT(MaCuon) as SLCuonMuon
+FROM DocGia, Muon
+WHERE DocGia.MaDG = Muon.MaDG
+GROUP BY TenDG, DiaChi
+
+--f. Cho biết mã cuốn, tựa sách và vị trí của những cuốn sách được xuất 
+--bản bởi nhà xuất bản “Addison Wesley”
+SELECT MaCuon, Tua, ViTri
+FROM NXB, (SELECT MaNXB, MaCuon, Tua, ViTri
+            FROM DauSach, CuonSach
+			WHERE DauSach.MaSach = CuonSach.MaSach) Q
+WHERE NXB.MaNXB = Q.MaNXB and TenNXB = 'Addison Wesley'
+
+--g. Với mỗi đầu sách, hãy cho biết Tên nhà xuất bản và số lượng tác giả 
+SELECT MaSach, TenNXB, SLTacGia
+FROM NXB, (SELECT DauSach.MaSach, MaNXB, COUNT(TenTacGia) as SLTacGia
+            FROM DauSach, TacGia
+			WHERE DauSach.MaSach = TacGia.MaSach
+			GROUP BY DauSach.MaSach, MaNXB) Q
+WHERE NXB.MaNXB = Q.MaNXB
+
+--h. Hãy cho biết Tên, địa chỉ, số điện thoại của những độc giả đã mượn 
+--từ 5 cuốn sáchtrở lên 
+SELECT TenDG, DiaChi, SoDT
+FROM Muon, DocGia
+WHERE Muon.MaDG = DocGia.MaDG
+GROUP BY TenDG, DiaChi, SoDT HAVING COUNT(MaCuon) >= 5
+
+--i. Cho biết mã NXB, tên NXB và số lượng đầu sách của NXB đó trong CSDL
+SELECT NXB.MaNXB, TenNXB, DiaChi, COUNT(MaSach) as SLDauSach
+FROM NXB, DauSach
+WHERE NXB.MaNXB = DauSach.MaNXB
+GROUP BY NXB.MaNXB, TenNXB, DiaChi
+
+--j. Cho biết mã NXB, tên NXB và địa chỉ của những NXB có từ 100 đầu sách trở lên 
+SELECT DauSach.MaNXB, TenNXB, DiaChi
+FROM DauSach, NXB
+WHERE DauSach.MaNXB= NXB.MaNXB
+GROUP BY DauSach.MaNXB, TenNXB, DiaChi
+HAVING COUNT(MaSach) >= 100 
+
+--k. Cho biết mã NXB, tên NXB, và số lượng tác giả đã hợp tác với NXB đó 
+SELECT NXB.MaNXB, TenNXB, COUNT(TenTacGia) as SLTacGiaHopTac
+FROM NXB, (SELECT distinct MaNXB, TenTacGia
+           FROM DauSach, TacGia
+		   WHERE DauSach.MaSach = TacGia.MaSach) Q
+WHERE NXB.MaNXB = Q.MaNXB 
+GROUP BY NXB.MaNXB, TenNXB
+
+--l. Tựa và số lượng tác giả của những cuốn sách có tác giả là “Hemingway”
+-- mà độc giả “Nguyễn Văn A” đã từng mượn 
+SELECT Tua, COUNT(TenTacGia) as SLTacGia
+FROM TacGia, (SELECT MaSach
+              FROM Muon, DocGia, CuonSach
+			  WHERE Muon.MaDG = DocGia.MaDG and TenDG = 'Nguyen Van A' 
+			         and Muon.MaCuon = CuonSach.MaCuon) Q, 
+			  (SELECT DauSach.MaSach, Tua
+			  FROM DauSach, TacGia
+			  WHERE DauSach.MaSach = TacGia.MaSach and TenTacGia = 'Hemingway') T
+WHERE Q.MaSach = T.MaSach and TacGia.MaSach = Q.MaSach
+GROUP BY Tua
+    </pre>
+</body>
+</html>
